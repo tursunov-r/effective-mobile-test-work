@@ -1,9 +1,26 @@
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 
+from src.core.database import create_tables, create_admin
+from src.api.admin_handlers import router as admin_router
 
-app = FastAPI()
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_tables()
+    await create_admin()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+routers = [admin_router]
+for router in routers:
+    app.include_router(router)
 
 @app.get("/")
 async def root():

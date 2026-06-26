@@ -4,7 +4,7 @@ from fastapi import Request
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from src.core.settings import settings
-from src.schemas.user_schema import TokenData
+from src.schemas.user_schemas import TokenData
 
 pwd_context = CryptContext(
     schemes=["bcrypt"], bcrypt__rounds=12, deprecated="auto"

@@ -52,7 +52,7 @@ class UserUpdateSchema(UserCreateSchema):
         return self
 
 
-class UserData(BaseModel):
+class UserDataResponseSchema(BaseModel):
     id: int
     first_name: str = Field(min_length=1, max_length=255)
     middle_name: str = Field(min_length=1, max_length=255)
@@ -61,7 +61,7 @@ class UserData(BaseModel):
 
 class UserCreateResponseSchema(BaseModel):
     message: str
-    data: UserData
+    data: UserDataResponseSchema
 
 
 class UserLoginSchema(BaseModel):

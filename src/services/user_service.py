@@ -1,7 +1,6 @@
-from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.user_schema import (
+from src.schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
     TokenData, UserUpdateSchema,
@@ -15,9 +14,7 @@ class UserService:
         create_user = await user_repository.create_user_query(
             user=user, session=session
         )
-        if create_user:
-            return create_user
-        raise
+        return create_user
 
     @staticmethod
     async def get_profile(token: TokenData, session: AsyncSession):
@@ -34,9 +31,7 @@ class UserService:
         delete_user = await user_repository.delete_user_query(
             token=token, user=user, session=session
         )
-        if delete_user:
-            return Response(status_code=204)
-        raise
+        return delete_user
 
 
 user_service = UserService()
