@@ -35,6 +35,22 @@ class UserCreateSchema(BaseModel):
             raise ValueError("Passwords don't match.")
         return self
 
+class UserUpdateSchema(UserCreateSchema):
+    first_name: str | None = Field(min_length=1, max_length=255, default=None)
+    middle_name: str | None = Field(min_length=1, max_length=255, default=None)
+    last_name: str | None = Field(min_length=1, max_length=255, default=None)
+    is_active: bool | None = Field(default=None)
+    password: str | None = Field(min_length=8, default=None)
+    confirm_password: str | None = Field(min_length=8, default=None)
+
+    @model_validator(mode="after")
+    def validate_confirm_password(self):
+        # Проверяем только если оба поля заданы
+        if self.password and self.confirm_password:
+            if self.password != self.confirm_password:
+                raise ValueError("Passwords don't match.")
+        return self
+
 
 class UserData(BaseModel):
     id: int
