@@ -18,18 +18,18 @@ class UserRepository:
             select(UserModel).where(UserModel.email == user.email)
         )
         result = email.scalar_one_or_none()
-        if result:
-            raise
-        hash_pwd = hash_password(user.password)
-        query = UserModel(
-            first_name=user.first_name,
-            middle_name=user.middle_name,
-            last_name=user.last_name,
-            email=str(user.email).lower(),
-            password=hash_pwd,
-        )
-        session.add(query)
-        return query
+        if not result:
+            hash_pwd = hash_password(user.password)
+            query = UserModel(
+                first_name=user.first_name,
+                middle_name=user.middle_name,
+                last_name=user.last_name,
+                email=str(user.email).lower(),
+                password=hash_pwd,
+            )
+            session.add(query)
+            return query
+        raise
 
     @staticmethod
     async def get_users_query(session: AsyncSession):
@@ -42,16 +42,24 @@ class UserRepository:
         raise
 
     @staticmethod
-    async def delete_user_query(user: UserLoginSchema, session: AsyncSession):
-        result = await session.execute(
-            select(UserModel).where(UserModel.email == user.email)
+    async def get_profile(token: TokenData, session: AsyncSession):
+        profile = await session.execute(select(UserModel).where(UserModel.email == token.email))
+        result = profile.scalar_one_or_none()
+        if result:
+            return result
+        raise
+
+    @staticmethod
+    async def delete_user_query(token: TokenData, user: UserLoginSchema, session: AsyncSession):
+        query = await session.execute(
+            select(UserModel).where(UserModel.email == token.email)
         )
-        db_user = result.scalar_one_or_none()
-        if not db_user:
-            raise
-        delete_user = UserModel(is_active=False)
-        session.add(delete_user)
-        return db_user
+        result = query.scalar_one_or_none()
+        if result.email == user.email and result.password == hash_password(user.password):
+            delete_user = UserModel(is_active=False)
+            session.add(delete_user)
+            return result
+        raise
 
     @staticmethod
     async def update_user_query(token: TokenData, user: UserUpdateSchema, session: AsyncSession):
