@@ -10,7 +10,7 @@ from src.services.admin_service import admin_service
 from src.utils.require_admin import require_admin
 from src.core.limiter import limiter
 
-router = APIRouter(prefix="/api/v1/admin_handlers/users", tags=["admin"])
+router = APIRouter(prefix="/api/v1/admin/users", tags=["admin"])
 
 
 @router.post("/", response_model=AdminUserCreateResponseSchema, status_code=201)
@@ -56,6 +56,7 @@ async def update_user(user: AdminUserUpdateSchema,
 @limiter.limit("1/minute")
 async def delete_user(user_id: int,
                       request: Request,
-                      session: AsyncSession = Depends(require_admin)):
+                      token: TokenData = Depends(require_admin),
+                      session: AsyncSession = Depends(get_session)):
     await admin_service.delete_user(user_id=user_id, session=session)
     return status.HTTP_204_NO_CONTENT
