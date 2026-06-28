@@ -3,35 +3,42 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.settings import settings
 from src.models.user_model import UserModel
-from src.schemas.admin_schemas import AdminUserCreateSchema
+from src.schemas.admin_schemas import AdminUserCreateSchema, AdminUserUpdateSchema
 from src.schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
     UserUpdateSchema, TokenData,
 )
-from src.utils.auth import hash_password
+from src.utils.auth import hash_password, verify_password
 
 
 class UserRepository:
     @staticmethod
     async def create_user_query(user: UserCreateSchema | AdminUserCreateSchema, session: AsyncSession):
-        email = await session.execute(
+        existing = await session.execute(
             select(UserModel).where(UserModel.email == user.email)
         )
-        result = email.scalar_one_or_none()
-        if not result:
-            hash_pwd = hash_password(user.password)
-            query = UserModel(
-                first_name=user.first_name,
-                middle_name=user.middle_name,
-                last_name=user.last_name,
-                email=str(user.email).lower(),
-                password=hash_pwd,
-                role=user.role if user.role else "user",
-            )
-            session.add(query)
-            return query
-        raise
+        if existing.scalar_one_or_none():
+            raise ValueError("User already exists")
+
+        hash_pwd = hash_password(user.password)
+        query = UserModel(
+            first_name=user.first_name,
+            middle_name=user.middle_name,
+            last_name=user.last_name,
+            email=str(user.email).lower(),
+            password=hash_pwd,
+            role="user",  # дефолтная роль
+        )
+
+        if isinstance(user, AdminUserCreateSchema):
+            query.role = user.role if user.role else "user"
+
+        session.add(query)
+        await session.flush()
+        return query
+
+
 
     @staticmethod
     async def get_users_query(session: AsyncSession):
@@ -60,12 +67,14 @@ class UserRepository:
         raise
 
     @staticmethod
-    async def update_user_query(token: TokenData, user: UserUpdateSchema | AdminUserCreateSchema,
+    async def update_user_query(token: TokenData, user: UserUpdateSchema | AdminUserUpdateSchema,
                                 session: AsyncSession):
-        if user.user_id:
+        if isinstance(user, AdminUserUpdateSchema):
+            # если запрос на обновление пользователя от админа (user_id из схемы)
             query = await session.execute(select(UserModel).where(UserModel.id == user.user_id))
         else:
-            query = await session.execute(select(UserModel).where(UserModel.email == token.email))
+            # иначе получаем id пользователя из JWT, так как api пользователя не может указывать произвольный user_id
+            query = await session.execute(select(UserModel).where(UserModel.id == token.user_id))
 
         result = query.scalar_one_or_none()
         if user.first_name:
@@ -76,20 +85,24 @@ class UserRepository:
             result.last_name = user.last_name.title()
         if user.password and user.confirm_password:
             result.password = hash_password(user.password)
-        if user.role:
+        if isinstance(user, AdminUserUpdateSchema) and user.role:
+            # если пользователя обновляет админ, можно обновить роль.
             result.role = user.role
         session.add(result)
         return result
 
     @staticmethod
     async def delete_user_query(token: TokenData, user: UserLoginSchema, session: AsyncSession):
+
         query = await session.execute(
-            select(UserModel).where(UserModel.email == token.email)
+            select(UserModel).where(UserModel.id == token.user_id)
         )
         result = query.scalar_one_or_none()
-        if result.email == user.email and result.password == hash_password(user.password):
-            delete_user = UserModel(is_active=False)
-            session.add(delete_user)
+        verify = verify_password(user.password, str(result.password))
+        if result.email == user.email and verify:
+            print("password match")
+            result.is_active = False
+            session.add(result)
             return result
         raise
 
@@ -98,11 +111,10 @@ class UserRepository:
         query = await session.execute(select(UserModel).where(UserModel.id == user_id))
         result = query.scalar_one_or_none()
         if result:
-            delete_user = UserModel(is_active=False)
-            session.add(delete_user)
+            result.is_active = False
+            session.add(result)
             return result
         raise
-
 
     @staticmethod
     async def create_admin_query(session: AsyncSession):

@@ -25,12 +25,12 @@ class AdminService:
 
     @staticmethod
     async def update_user(user: AdminUserUpdateSchema, token: TokenData, session: AsyncSession):
-        result = await user_repository.update_user_query(user=user, session=session)
+        result = await user_repository.update_user_query(token=token, user=user, session=session)
         return result
 
     @staticmethod
-    async def delete_user(user_id: int, token: TokenData, session: AsyncSession):
-        result = await user_repository.delete_user_query(user_id=user_id, session=session)
+    async def delete_user(user_id: int, session: AsyncSession):
+        result = await user_repository.delete_user_by_id(user_id=user_id, session=session)
         return result
 
 admin_service = AdminService()

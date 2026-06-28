@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db_connect import get_session
@@ -8,6 +8,7 @@ from src.schemas.admin_schemas import AdminUserDataResponseSchema, AdminUserCrea
 from src.schemas.user_schemas import TokenData
 from src.services.admin_service import admin_service
 from src.utils.auth import get_current_user
+from src.utils.require_admin import require_admin
 
 router = APIRouter(prefix="/api/v1/admin_handlers/users", tags=["admin"])
 
@@ -35,14 +36,14 @@ async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_sessi
     return result
 
 
-@router.patch("/{user_id}", response_model=AdminUserCreateResponseSchema)
+@router.patch("/", response_model=AdminUserCreateResponseSchema)
 async def update_user(user: AdminUserUpdateSchema, session: AsyncSession = Depends(get_session),
                       token: TokenData = Depends(get_current_user)):
     updated_user = await admin_service.update_user(user=user, session=session, token=token)
     return {"message": "update success", "data": updated_user}
 
 
-@router.delete("/{user_id}")
-async def delete_user(user_id: int, session: AsyncSession = Depends(get_session),
-                      token: TokenData = Depends(get_current_user)):
-    result = await admin_service.delete_user(user_id=user_id, session=session, token=token)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(user_id: int, session: AsyncSession = Depends(get_session)):
+    await admin_service.delete_user(user_id=user_id,session=session)
+    return status.HTTP_204_NO_CONTENT

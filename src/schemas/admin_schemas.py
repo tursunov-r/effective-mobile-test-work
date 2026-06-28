@@ -14,6 +14,7 @@ class AdminUserUpdateSchema(UserUpdateSchema):
 
 class AdminUserDataResponseSchema(UserDataResponseSchema):
     role: str
+    is_active: bool
 
 
 class AdminUserCreateResponseSchema(UserCreateResponseSchema):
