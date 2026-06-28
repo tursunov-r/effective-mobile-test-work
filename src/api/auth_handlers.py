@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Response, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from src.core.limiter import limiter
 from src.schemas.user_schemas import UserLoginSchema
 from src.core.db_connect import get_session
 from src.services.profile_service import profile_service
@@ -10,6 +11,7 @@ router = APIRouter(prefix="/api/v1/profiles", tags=["profile v1"])
 
 
 @router.post("/")
+@limiter.limit("1/minute")
 async def login(
     user: UserLoginSchema,
     response: Response,
@@ -23,6 +25,7 @@ async def login(
 
 
 @router.post("/logout")
+@limiter.limit("1/minute")
 async def logout(
     request: Request,
     response: Response,

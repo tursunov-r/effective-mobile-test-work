@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from src.core.db_connect import get_session
+from src.core.limiter import limiter
 from src.services.user_service import user_service
 from src.services.profile_service import profile_service
 from src.schemas.user_schemas import (
@@ -22,6 +23,7 @@ router = APIRouter(prefix="/api/v1/users", tags=["user v1"])
 
 
 @router.post("/", response_model=UserCreateResponseSchema)
+@limiter.limit("1/minute")
 async def create_user(
     user: UserCreateSchema,
     request: Request,
@@ -32,6 +34,7 @@ async def create_user(
 
 
 @router.get("/", response_model=UserDataResponseSchema)
+@limiter.limit("1/minute")
 async def get_profile(
     request: Request,
     session: AsyncSession = Depends(get_session),
@@ -43,6 +46,7 @@ async def get_profile(
     return profile
 
 @router.patch("/", response_model=UserDataResponseSchema)
+@limiter.limit("1/minute")
 async def update_profile(
         request: Request,
         user: UserUpdateSchema,
@@ -54,6 +58,7 @@ async def update_profile(
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("1/minute")
 async def delete_user(
     request: Request,
     user: UserLoginSchema,
