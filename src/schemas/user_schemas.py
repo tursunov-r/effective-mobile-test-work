@@ -21,7 +21,6 @@ class UserUpdateSchema(UserCreateSchema):
     first_name: str | None = Field(min_length=1, max_length=255, default=None)
     middle_name: str | None = Field(min_length=1, max_length=255, default=None)
     last_name: str | None = Field(min_length=1, max_length=255, default=None)
-    is_active: bool | None = Field(default=None)
     email: EmailStr | None = Field(default=None)
     password: str | None = Field(min_length=8, default=None)
     confirm_password: str | None = Field(min_length=8, default=None)

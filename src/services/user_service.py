@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.repositories.auth_repository import auth_repository
 from src.schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
@@ -18,7 +19,7 @@ class UserService:
 
     @staticmethod
     async def get_profile(token: TokenData, session: AsyncSession):
-        profile = await user_repository.get_profile_query(token=token, session=session)
+        profile = await auth_repository.get_profile_query(user=token, session=session)
         return profile
 
     @staticmethod

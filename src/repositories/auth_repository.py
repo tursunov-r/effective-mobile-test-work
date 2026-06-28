@@ -1,6 +1,7 @@
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.exceptions.auth_exceptions import InvalidCredentials
 from src.models.user_model import UserModel
 from src.schemas.user_schemas import (
     UserLoginSchema,
@@ -25,7 +26,7 @@ class AuthRepository:
             verified = verify_password(user.password, result.password)
             if verified:
                 return result
-        raise
+        raise InvalidCredentials("Invalid credentials")
 
     @staticmethod
     async def get_profile_query(session: AsyncSession, user: TokenData):

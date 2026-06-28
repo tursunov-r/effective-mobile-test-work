@@ -2,6 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.settings import settings
+from src.exceptions.auth_exceptions import Unauthorized, InvalidCredentials
+from src.exceptions.user_exceptions import UserNotFound
 from src.models.user_model import UserModel
 from src.schemas.admin_schemas import AdminUserCreateSchema, AdminUserUpdateSchema
 from src.schemas.user_schemas import (
@@ -48,7 +50,7 @@ class UserRepository:
         users = result.scalars().all()
         if users:
             return users
-        raise
+        raise UserNotFound("User not found")
 
     @staticmethod
     async def get_user_by_id(user_id: int, session: AsyncSession):
@@ -56,15 +58,8 @@ class UserRepository:
         result = user.scalar_one_or_none()
         if result:
             return result
-        raise
+        raise UserNotFound("User not found")
 
-    @staticmethod
-    async def get_profile(token: TokenData, session: AsyncSession):
-        profile = await session.execute(select(UserModel).where(UserModel.email == token.email))
-        result = profile.scalar_one_or_none()
-        if result:
-            return result
-        raise
 
     @staticmethod
     async def update_user_query(token: TokenData, user: UserUpdateSchema | AdminUserUpdateSchema,
@@ -85,9 +80,15 @@ class UserRepository:
             result.last_name = user.last_name.title()
         if user.password and user.confirm_password:
             result.password = hash_password(user.password)
-        if isinstance(user, AdminUserUpdateSchema) and user.role:
+        if user.email:
+            result.email = str(user.email).lower()
+        if isinstance(user, AdminUserUpdateSchema):
             # если пользователя обновляет админ, можно обновить роль.
-            result.role = user.role
+            if user.role:
+                result.role = user.role
+            if user.is_active:
+                result.is_active = user.is_active
+
         session.add(result)
         return result
 
@@ -104,7 +105,7 @@ class UserRepository:
             result.is_active = False
             session.add(result)
             return result
-        raise
+        raise InvalidCredentials("Invalid credentials, please try again")
 
     @staticmethod
     async def delete_user_by_id(user_id: int, session: AsyncSession):
@@ -114,7 +115,7 @@ class UserRepository:
             result.is_active = False
             session.add(result)
             return result
-        raise
+        raise UserNotFound("User not found")
 
     @staticmethod
     async def create_admin_query(session: AsyncSession):

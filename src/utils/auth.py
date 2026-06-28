@@ -4,6 +4,7 @@ from fastapi import Request
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from src.core.settings import settings
+from src.exceptions.auth_exceptions import Unauthorized
 from src.schemas.user_schemas import TokenData
 
 pwd_context = CryptContext(
@@ -47,12 +48,12 @@ async def get_current_user(request: Request):
     token = request.cookies.get("access_token")
 
     if not token:
-        raise
+        raise Unauthorized("You are not authorized")
 
     token_data = verify_token(token)
 
     if not token_data:
-        raise
+        raise Unauthorized("Invalid token")
 
     return token_data
 

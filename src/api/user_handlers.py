@@ -53,7 +53,7 @@ async def update_profile(
     return updated_profile
 
 
-@router.delete("/", response_model=UserDataResponseSchema, status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     request: Request,
     user: UserLoginSchema,
