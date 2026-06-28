@@ -1,7 +1,7 @@
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.exceptions.auth_exceptions import InvalidCredentials
+from src.exceptions.auth_exceptions import InvalidCredentials, Unauthorized
 from src.models.user_model import UserModel
 from src.schemas.user_schemas import (
     UserLoginSchema,
@@ -40,7 +40,7 @@ class AuthRepository:
         user = result.scalar_one_or_none()
         if user:
             return user
-        raise
+        raise Unauthorized("User not authorized")
 
 
 auth_repository = AuthRepository()

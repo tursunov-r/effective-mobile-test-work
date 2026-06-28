@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.settings import settings
 from src.exceptions.auth_exceptions import Unauthorized, InvalidCredentials
-from src.exceptions.user_exceptions import UserNotFound
+from src.exceptions.user_exceptions import UserNotFound, UserAlreadyExists
 from src.models.user_model import UserModel
 from src.schemas.admin_schemas import AdminUserCreateSchema, AdminUserUpdateSchema
 from src.schemas.user_schemas import (
@@ -21,7 +21,7 @@ class UserRepository:
             select(UserModel).where(UserModel.email == user.email)
         )
         if existing.scalar_one_or_none():
-            raise ValueError("User already exists")
+            raise UserAlreadyExists("User already exists")
 
         hash_pwd = hash_password(user.password)
         query = UserModel(

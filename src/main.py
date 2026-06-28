@@ -7,6 +7,7 @@ from src.core.database import create_tables, create_admin
 from src.api.admin_handlers import router as admin_router
 from src.api.auth_handlers import router as auth_router
 from src.api.user_handlers import router as user_router
+from src.api.exceprion_handlers import register_exception_handlers
 
 
 
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+register_exception_handlers(app)
 
 
 routers = [admin_router, auth_router, user_router]
