@@ -34,6 +34,7 @@ jobs:
           pip install mypy
           mypy src/ --ignore-missing-imports --ignore-errors
 
+      # так как база данных локальна, тесты не пригодятся
       # - name: Run tests
       #   run: |
       #     pip install pytest
