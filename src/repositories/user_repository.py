@@ -94,25 +94,27 @@ class UserRepository:
             )
 
         result = query.scalar_one_or_none()
-        if user.first_name:
-            result.first_name = user.first_name.title()
-        if user.middle_name:
-            result.middle_name = user.middle_name.title()
-        if user.last_name:
-            result.last_name = user.last_name.title()
-        if user.password and user.confirm_password:
-            result.password = hash_password(user.password)
-        if user.email:
-            result.email = str(user.email).lower()
-        if isinstance(user, AdminUserUpdateSchema):
-            # если пользователя обновляет админ, можно обновить роль.
-            if user.role:
-                result.role = user.role
-            if user.is_active:
-                result.is_active = user.is_active
+        if result:
+            if user.first_name:
+                result.first_name = user.first_name.title()
+            if user.middle_name:
+                result.middle_name = user.middle_name.title()
+            if user.last_name:
+                result.last_name = user.last_name.title()
+            if user.password and user.confirm_password:
+                result.password = hash_password(user.password)
+            if user.email:
+                result.email = str(user.email).lower()
+            if isinstance(user, AdminUserUpdateSchema):
+                # если пользователя обновляет админ, можно обновить роль и восстановить пользователя.
+                if user.role:
+                    result.role = user.role
+                if user.is_active:
+                    result.is_active = user.is_active
 
-        session.add(result)
-        return result
+            session.add(result)
+            return result
+        raise UserNotFound("User not found")
 
     @staticmethod
     async def delete_user_query(
