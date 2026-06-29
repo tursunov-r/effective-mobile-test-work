@@ -35,7 +35,7 @@ class AdminService:
 
     @staticmethod
     async def delete_user(user_id: int, session: AsyncSession, token: TokenData):
-        result = await user_repository.delete_user_by_id(user_id=user_id, session=session)
+        result = await user_repository.delete_user_by_id_query(user_id=user_id, session=session)
         log_service.info(f"{token.email} deleted user: ", user=user_id)
         return result
 

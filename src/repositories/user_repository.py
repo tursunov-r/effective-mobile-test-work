@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.settings import settings
-from src.exceptions.auth_exceptions import Unauthorized, InvalidCredentials
+from src.exceptions.auth_exceptions import InvalidCredentials
 from src.exceptions.user_exceptions import UserNotFound, UserAlreadyExists
 from src.models.user_model import UserModel
 from src.schemas.admin_schemas import AdminUserCreateSchema, AdminUserUpdateSchema
@@ -53,7 +53,7 @@ class UserRepository:
         raise UserNotFound("User not found")
 
     @staticmethod
-    async def get_user_by_id(user_id: int, session: AsyncSession):
+    async def get_user_by_id_query(user_id: int, session: AsyncSession):
         user = await session.execute(select(UserModel).where(UserModel.id == user_id))
         result = user.scalar_one_or_none()
         if result:
@@ -108,7 +108,7 @@ class UserRepository:
         raise InvalidCredentials("Invalid credentials, please try again")
 
     @staticmethod
-    async def delete_user_by_id(user_id: int, session: AsyncSession):
+    async def delete_user_by_id_query(user_id: int, session: AsyncSession):
         query = await session.execute(select(UserModel).where(UserModel.id == user_id))
         result = query.scalar_one_or_none()
         if result:

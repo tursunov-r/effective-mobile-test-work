@@ -57,7 +57,7 @@ async def test_get_profile():
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        response = await client.get(BASE_URL + "/")
+        response = await client.get(BASE_URL + "/me")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert "email" in data
@@ -74,7 +74,7 @@ async def test_update_profile():
             "first_name": settings.admin_first_name,
             "last_name": settings.admin_last_name,
         }
-        response = await client.patch(BASE_URL + "/", json=payload)
+        response = await client.patch(BASE_URL + "/me", json=payload)
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["first_name"] == settings.admin_first_name
@@ -88,7 +88,7 @@ async def test_delete_user():
             "email": unique_email,
             "password": "secret123"
         }
-        response = await client.request("DELETE", BASE_URL + "/", json=payload)
+        response = await client.request("DELETE", BASE_URL + "/me", json=payload)
         assert response.status_code in [
             status.HTTP_204_NO_CONTENT,
             status.HTTP_400_BAD_REQUEST,

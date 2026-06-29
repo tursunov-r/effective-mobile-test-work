@@ -33,7 +33,7 @@ async def create_user(
     return {"message": "Created", "data": new_user}
 
 
-@router.get("/", response_model=UserDataResponseSchema)
+@router.get("/me", response_model=UserDataResponseSchema)
 @limiter.limit("5/minute")
 async def get_profile(
     request: Request,
@@ -45,7 +45,7 @@ async def get_profile(
     )
     return profile
 
-@router.patch("/", response_model=UserDataResponseSchema)
+@router.patch("/me", response_model=UserDataResponseSchema)
 @limiter.limit("5/minute")
 async def update_profile(
         request: Request,
@@ -57,7 +57,7 @@ async def update_profile(
     return updated_profile
 
 
-@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit("5/minute")
 async def delete_user(
     request: Request,

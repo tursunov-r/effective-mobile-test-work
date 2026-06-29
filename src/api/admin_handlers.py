@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db_connect import get_session
-from src.repositories.user_repository import user_repository
 from src.schemas.admin_schemas import AdminUserDataResponseSchema, AdminUserCreateSchema, AdminUserCreateResponseSchema, \
     AdminUserUpdateSchema
 from src.schemas.user_schemas import TokenData
@@ -38,7 +37,7 @@ async def get_user_by_id(user_id: int,
                          request: Request,
                          session: AsyncSession = Depends(get_session),
                          token: TokenData = Depends(require_admin)):
-    result = await user_repository.get_user_by_id(user_id=user_id, session=session, token=token)
+    result = await admin_service.get_user_by_id(user_id=user_id, session=session, token=token)
     return result
 
 

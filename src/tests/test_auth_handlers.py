@@ -39,7 +39,7 @@ async def test_logout():
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         # делаем логаут
-        resp_logout = await client.post(BASE_URL + "/logout")
+        resp_logout = await client.delete(BASE_URL + "/")
         assert resp_logout.status_code == status.HTTP_204_NO_CONTENT
         # проверяем что cookie удалено
         assert "jwt" not in resp_logout.cookies

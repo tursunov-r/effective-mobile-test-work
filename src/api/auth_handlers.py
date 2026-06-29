@@ -24,7 +24,7 @@ async def login(
     return result
 
 
-@router.post("/logout")
+@router.delete("/")
 @limiter.limit("5/minute")
 async def logout(
     request: Request,
