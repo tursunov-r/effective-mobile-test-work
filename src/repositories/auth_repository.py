@@ -14,7 +14,8 @@ class AuthRepository:
     @staticmethod
     async def login_user_query(user: UserLoginSchema, session: AsyncSession):
         """
-        Возвращает пользователя для авторизации только если его email есть в БД и он не заблокирован.
+        Возвращает пользователя для авторизации,
+        только если его email есть в БД и он не заблокирован.
         """
         query = await session.execute(
             select(UserModel).where(

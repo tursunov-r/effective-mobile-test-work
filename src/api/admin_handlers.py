@@ -26,7 +26,8 @@ async def create_user(
     session: AsyncSession = Depends(get_session),
     token: TokenData = Depends(require_admin),
 ):
-    """Эндпоинт создает пользователя от имени администратора и позволяет так же указать роль пользователя"""
+    """Эндпоинт создает пользователя от имени администратора
+    и позволяет так же указать роль пользователя"""
     result = await admin_service.create_user(
         user=user, session=session, token=token
     )
@@ -40,7 +41,8 @@ async def get_users(
     session: AsyncSession = Depends(get_session),
     token: TokenData = Depends(require_admin),
 ):
-    """Возвращает список всех пользователей, доступно только пользователям с ролью admin"""
+    """Возвращает список всех пользователей,
+    доступно только пользователям с ролью admin"""
     users = await admin_service.get_users(session=session, token=token)
     return users
 
@@ -53,7 +55,8 @@ async def get_user_by_id(
     session: AsyncSession = Depends(get_session),
     token: TokenData = Depends(require_admin),
 ):
-    """Возвращает данные о пользователе по id, доступно только пользователям с ролью admin"""
+    """Возвращает данные о пользователе по id,
+    доступно только пользователям с ролью admin"""
     result = await admin_service.get_user_by_id(
         user_id=user_id, session=session, token=token
     )
@@ -68,7 +71,8 @@ async def update_user(
     session: AsyncSession = Depends(get_session),
     token: TokenData = Depends(require_admin),
 ):
-    """Обновляет пользователя, можно изменить и роль и пароль, доступно только admin"""
+    """Обновляет пользователя, можно изменить и роль и пароль,
+    доступно только admin"""
     updated_user = await admin_service.update_user(
         user=user, session=session, token=token
     )

@@ -76,16 +76,19 @@ class UserRepository:
         session: AsyncSession,
     ):
         """
-        Обновляет пользователя, если пользователь обновляет себя сам, он не может изменить свою роль
+        Обновляет пользователя, если пользователь обновляет себя сам,
+        он не может изменить свою роль.
         Обновление роли доступно только администратору.
         """
         if isinstance(user, AdminUserUpdateSchema):
-            # если запрос на обновление пользователя от админа (user_id из схемы)
+            # если запрос на обновление пользователя от админа
+            # (user_id из схемы)
             query = await session.execute(
                 select(UserModel).where(UserModel.id == user.user_id)
             )
         else:
-            # иначе получаем id пользователя из JWT, так как api пользователя не может указывать произвольный user_id
+            # иначе получаем id пользователя из JWT,
+            # так как api пользователя не может указывать произвольный user_id
             query = await session.execute(
                 select(UserModel).where(UserModel.id == token.user_id)
             )

@@ -11,11 +11,13 @@ class PasswordMixin(BaseModel):
     @field_validator("password")
     def validate_password(cls, pwd: str):
         pattern = re.compile(
-            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};:\'",.<>?/\\|`~]).{8,}$'
+            r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=."
+            r'*[!@#$%^&*()_\-+=\[\]{};:\'",.<>?/\\|`~]).{8,}$'
         )
         if not pattern.match(pwd):
             raise ValueError(
-                "Password must contain lowercase and uppercase letters, numbers and special characters."
+                "Password must contain lowercase and uppercase letters, "
+                "numbers and special characters."
             )
         return pwd
 
@@ -36,11 +38,13 @@ class PasswordOptionalMixin(BaseModel):
         if pwd is None:
             return pwd
         pattern = re.compile(
-            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[\]{};:\'",.<>?/\\|`~]).{8,}$'
+            r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=."
+            r'*[!@#$%^&*()_\-+=\[\]{};:\'",.<>?/\\|`~]).{8,}$'
         )
         if not pattern.match(pwd):
             raise ValueError(
-                "Password must contain lowercase and uppercase letters, numbers and special characters."
+                "Password must contain lowercase and uppercase letters, "
+                "numbers and special characters."
             )
         return pwd
 
