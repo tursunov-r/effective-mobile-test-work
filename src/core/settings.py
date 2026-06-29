@@ -1,11 +1,11 @@
 import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
 class Settings(BaseSettings):
-    TEST: str = "False"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
@@ -23,20 +23,11 @@ class Settings(BaseSettings):
     admin_middle_name: str = "admin"
     admin_last_name: str = "admin"
 
-    test = TEST.lower() in ("true", "t", "1", "yes", "y", "on")
-
     @property
     def db_url(self):
-        return (
-            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        ) if self.test == False else f"sqlite+aiosqlite:///database.dbя"
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    @property
-    def pool_url(self):
-        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=os.path.join(BASE_DIR, ".env"))
 
 
 settings = Settings()

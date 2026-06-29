@@ -1,12 +1,13 @@
-from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.user_schema import (
+from src.repositories.user_repository import user_repository
+from src.schemas.user_schemas import (
+    TokenData,
     UserCreateSchema,
     UserLoginSchema,
-    TokenData, UserUpdateSchema,
+    UserUpdateSchema,
 )
-from src.repositories.user_repository import user_repository
+from src.services.logger import log_service
 
 
 class UserService:
@@ -15,28 +16,28 @@ class UserService:
         create_user = await user_repository.create_user_query(
             user=user, session=session
         )
-        if create_user:
-            return create_user
-        raise
+        log_service.info("create new user: ", user=user.email)
+        return create_user
 
     @staticmethod
-    async def get_profile(token: TokenData, session: AsyncSession):
-        profile = await user_repository.get_profile_query(token=token, session=session)
-        return profile
-
-    @staticmethod
-    async def update_user(token: TokenData, user: UserUpdateSchema, session: AsyncSession):
-        update_user = await user_repository.update_user_query(token=token, user=user, session=session)
+    async def update_user(
+        token: TokenData, user: UserUpdateSchema, session: AsyncSession
+    ):
+        update_user = await user_repository.update_user_query(
+            token=token, user=user, session=session
+        )
+        log_service.info("update self profile: ", user=token.email)
         return update_user
 
     @staticmethod
-    async def delete_user(token: TokenData, user: UserLoginSchema, session: AsyncSession):
+    async def delete_user(
+        token: TokenData, user: UserLoginSchema, session: AsyncSession
+    ):
         delete_user = await user_repository.delete_user_query(
             token=token, user=user, session=session
         )
-        if delete_user:
-            return Response(status_code=204)
-        raise
+        log_service.info("delete self profile: ", user=token.email)
+        return delete_user
 
 
 user_service = UserService()

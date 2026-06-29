@@ -20,6 +20,4 @@ class UserModel(Base):
         nullable=False, default=datetime.now
     )
     role: Mapped[str] = mapped_column(nullable=False, default="user")
-    is_active: Mapped[bool] = mapped_column(
-        nullable=False, default=True
-    )
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
