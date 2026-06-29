@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/v1/profiles", tags=["profile v1"])
 
 
 @router.post("/")
-@limiter.limit("1/minute")
+@limiter.limit("5/minute")
 async def login(
     user: UserLoginSchema,
     response: Response,
@@ -25,7 +25,7 @@ async def login(
 
 
 @router.post("/logout")
-@limiter.limit("1/minute")
+@limiter.limit("5/minute")
 async def logout(
     request: Request,
     response: Response,
