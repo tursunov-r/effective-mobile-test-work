@@ -1,12 +1,13 @@
 from datetime import timedelta
+
 from fastapi import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.user_schemas import UserLoginSchema, TokenData
+from src.core.settings import settings
 from src.repositories.auth_repository import auth_repository
+from src.schemas.user_schemas import TokenData, UserLoginSchema
 from src.services.logger import log_service
 from src.utils.auth import create_access_token
-from src.core.settings import settings
 
 
 class ProfileService:
@@ -21,7 +22,11 @@ class ProfileService:
             raise
         # Создание токена
         access_token = create_access_token(
-            data={"user_id": login.id, "email": login.email, "role": login.role},
+            data={
+                "user_id": login.id,
+                "email": login.email,
+                "role": login.role,
+            },
             expires_delta=timedelta(),
         )
         response.set_cookie(
@@ -32,7 +37,7 @@ class ProfileService:
             samesite="Lax",
             max_age=3600 * 24,
         )
-        log_service.info(f"logged in user: ", user=user.email)
+        log_service.info("logged in user: ", user=user.email)
         return {"access_token": access_token, "token_type": "bearer"}
 
     @staticmethod
@@ -40,7 +45,7 @@ class ProfileService:
         result = await auth_repository.get_profile_query(
             user=user, session=session
         )
-        log_service.info(f"check self profile: ", user=user.email)
+        log_service.info("check self profile: ", user=user.email)
         return result
 
     @staticmethod

@@ -1,21 +1,24 @@
 import random
-import pytest
+
 import httpx
+import pytest
 from fastapi import status
+
 from src.main import app
 
-"""
-Тесты e2e
-"""
+# Тесты e2e
 
 BASE_URL = "/api/v1/admin/users"
 user_count = 0
-email = random.randint(100000, 999999) # для уникального email
+email = random.randint(100000, 999999)  # для уникального email
+
 
 @pytest.mark.asyncio
 async def test_create_user():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as client:
         payload = {
             "first_name": "Иван",
             "middle_name": "Иванович",
@@ -37,7 +40,9 @@ async def test_create_user():
 async def test_get_users():
     transport = httpx.ASGITransport(app=app)
     global user_count
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as client:
         response = await client.get(BASE_URL + "/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -49,7 +54,9 @@ async def test_get_users():
 @pytest.mark.asyncio
 async def test_get_user_by_id():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as client:
         response = await client.get(BASE_URL + "/1")
         if response.status_code == status.HTTP_200_OK:
             data = response.json()
@@ -61,13 +68,15 @@ async def test_get_user_by_id():
 @pytest.mark.asyncio
 async def test_update_user():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as client:
         payload = {
             "user_id": 1,
             "first_name": "Петр",
             "last_name": "Петров",
             "role": "admin",
-            "is_active": True
+            "is_active": True,
         }
         response = await client.patch(BASE_URL + "/", json=payload)
         if response.status_code == status.HTTP_200_OK:
@@ -75,12 +84,20 @@ async def test_update_user():
             assert data["message"] == "update success"
             assert data["data"]["first_name"] == "Петр"
         else:
-            assert response.status_code in [status.HTTP_404_NOT_FOUND, status.HTTP_400_BAD_REQUEST]
+            assert response.status_code in [
+                status.HTTP_404_NOT_FOUND,
+                status.HTTP_400_BAD_REQUEST,
+            ]
 
 
 @pytest.mark.asyncio
 async def test_delete_user():
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as client:
         response = await client.delete(BASE_URL + f"/{user_count}")
-        assert response.status_code in [status.HTTP_204_NO_CONTENT, status.HTTP_404_NOT_FOUND]
+        assert response.status_code in [
+            status.HTTP_204_NO_CONTENT,
+            status.HTTP_404_NOT_FOUND,
+        ]

@@ -2,18 +2,15 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
-from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from starlette.middleware.cors import CORSMiddleware
 
-from src.core.database import create_tables, create_admin
-from src.api.admin_handlers import router as admin_router
-from src.api.auth_handlers import router as auth_router
-from src.api.user_handlers import router as user_router
+from src.api import routers
 from src.api.exceprion_handlers import register_exception_handlers
+from src.core.database import create_admin, create_tables
 from src.core.limiter import limiter
-from src.core.settings import settings
 
 
 @asynccontextmanager
@@ -29,8 +26,6 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-routers = [admin_router, auth_router, user_router]
-
 for router in routers:
     app.include_router(router)
 
@@ -41,11 +36,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
 
 if __name__ == "__main__":

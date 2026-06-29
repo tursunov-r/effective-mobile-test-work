@@ -3,20 +3,29 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.settings import settings
 from src.exceptions.auth_exceptions import InvalidCredentials
-from src.exceptions.user_exceptions import UserNotFound, UserAlreadyExists
+from src.exceptions.user_exceptions import UserAlreadyExists, UserNotFound
 from src.models.user_model import UserModel
-from src.schemas.admin_schemas import AdminUserCreateSchema, AdminUserUpdateSchema
+from src.schemas.admin_schemas import (
+    AdminUserCreateSchema,
+    AdminUserUpdateSchema,
+)
 from src.schemas.user_schemas import (
+    TokenData,
     UserCreateSchema,
     UserLoginSchema,
-    UserUpdateSchema, TokenData,
+    UserUpdateSchema,
 )
 from src.utils.auth import hash_password, verify_password
 
 
 class UserRepository:
     @staticmethod
-    async def create_user_query(user: UserCreateSchema | AdminUserCreateSchema, session: AsyncSession):
+    async def create_user_query(
+        user: UserCreateSchema | AdminUserCreateSchema, session: AsyncSession
+    ):
+        """
+        Регистрирует пользователя в БД
+        """
         existing = await session.execute(
             select(UserModel).where(UserModel.email == user.email)
         )
@@ -40,13 +49,10 @@ class UserRepository:
         await session.flush()
         return query
 
-
-
     @staticmethod
     async def get_users_query(session: AsyncSession):
-        result = await session.execute(
-            select(UserModel)
-        )
+        """Возвращает список пользователей из БД"""
+        result = await session.execute(select(UserModel))
         users = result.scalars().all()
         if users:
             return users
@@ -54,22 +60,35 @@ class UserRepository:
 
     @staticmethod
     async def get_user_by_id_query(user_id: int, session: AsyncSession):
-        user = await session.execute(select(UserModel).where(UserModel.id == user_id))
+        """Возвращает данные пользователя по id"""
+        user = await session.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
         result = user.scalar_one_or_none()
         if result:
             return result
         raise UserNotFound("User not found")
 
-
     @staticmethod
-    async def update_user_query(token: TokenData, user: UserUpdateSchema | AdminUserUpdateSchema,
-                                session: AsyncSession):
+    async def update_user_query(
+        token: TokenData,
+        user: UserUpdateSchema | AdminUserUpdateSchema,
+        session: AsyncSession,
+    ):
+        """
+        Обновляет пользователя, если пользователь обновляет себя сам, он не может изменить свою роль
+        Обновление роли доступно только администратору.
+        """
         if isinstance(user, AdminUserUpdateSchema):
             # если запрос на обновление пользователя от админа (user_id из схемы)
-            query = await session.execute(select(UserModel).where(UserModel.id == user.user_id))
+            query = await session.execute(
+                select(UserModel).where(UserModel.id == user.user_id)
+            )
         else:
             # иначе получаем id пользователя из JWT, так как api пользователя не может указывать произвольный user_id
-            query = await session.execute(select(UserModel).where(UserModel.id == token.user_id))
+            query = await session.execute(
+                select(UserModel).where(UserModel.id == token.user_id)
+            )
 
         result = query.scalar_one_or_none()
         if user.first_name:
@@ -93,15 +112,19 @@ class UserRepository:
         return result
 
     @staticmethod
-    async def delete_user_query(token: TokenData, user: UserLoginSchema, session: AsyncSession):
-
+    async def delete_user_query(
+        token: TokenData, user: UserLoginSchema, session: AsyncSession
+    ):
+        """
+        Блокировка пользователя по токену (если пользователь этого пожелал сам)
+        для подтверждения требуется ввести свой email и пароль.
+        """
         query = await session.execute(
             select(UserModel).where(UserModel.id == token.user_id)
         )
         result = query.scalar_one_or_none()
         verify = verify_password(user.password, str(result.password))
         if result.email == user.email and verify:
-            print("password match")
             result.is_active = False
             session.add(result)
             return result
@@ -109,7 +132,10 @@ class UserRepository:
 
     @staticmethod
     async def delete_user_by_id_query(user_id: int, session: AsyncSession):
-        query = await session.execute(select(UserModel).where(UserModel.id == user_id))
+        """Блокировка пользователя для администратора."""
+        query = await session.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
         result = query.scalar_one_or_none()
         if result:
             result.is_active = False
@@ -119,6 +145,7 @@ class UserRepository:
 
     @staticmethod
     async def create_admin_query(session: AsyncSession):
+        """функция создает администратора как первого пользователя."""
         hash_pwd = hash_password(settings.admin_password)
 
         result = await session.execute(
@@ -135,7 +162,7 @@ class UserRepository:
             first_name=settings.admin_first_name,
             middle_name=settings.admin_middle_name,
             last_name=settings.admin_last_name,
-            role="admin"
+            role="admin",
         )
 
         session.add(create_admin)

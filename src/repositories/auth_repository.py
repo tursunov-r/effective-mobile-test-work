@@ -1,11 +1,11 @@
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions.auth_exceptions import InvalidCredentials, Unauthorized
 from src.models.user_model import UserModel
 from src.schemas.user_schemas import (
-    UserLoginSchema,
     TokenData,
+    UserLoginSchema,
 )
 from src.utils.auth import verify_password
 
@@ -13,6 +13,9 @@ from src.utils.auth import verify_password
 class AuthRepository:
     @staticmethod
     async def login_user_query(user: UserLoginSchema, session: AsyncSession):
+        """
+        Возвращает пользователя для авторизации только если его email есть в БД и он не заблокирован.
+        """
         query = await session.execute(
             select(UserModel).where(
                 and_(
@@ -30,6 +33,7 @@ class AuthRepository:
 
     @staticmethod
     async def get_profile_query(session: AsyncSession, user: TokenData):
+        """Возвращает профиль аутентифицированного пользователя."""
         result = await session.execute(
             select(UserModel).where(
                 and_(

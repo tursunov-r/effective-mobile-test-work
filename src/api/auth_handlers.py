@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Request, Response, Depends
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from src.core.db_connect import get_session
 from src.core.limiter import limiter
 from src.schemas.user_schemas import UserLoginSchema
-from src.core.db_connect import get_session
 from src.services.profile_service import profile_service
 
 router = APIRouter(prefix="/api/v1/profiles", tags=["profile v1"])
@@ -18,6 +18,7 @@ async def login(
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
+    """Аутентификация пользователя"""
     result = await profile_service.login_user(
         user=user, response=response, session=session
     )
@@ -30,6 +31,7 @@ async def logout(
     request: Request,
     response: Response,
 ):
+    """Выйти из системы"""
     await profile_service.logout_user(response)
 
     response.status_code = status.HTTP_204_NO_CONTENT

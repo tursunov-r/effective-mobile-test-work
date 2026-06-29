@@ -1,17 +1,14 @@
-import sys
 import os
+import sys
 
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-
-from src.main import app
-from src.schemas.user_schemas import TokenData
-from src.utils.require_admin import require_admin
-from src.utils.auth import get_current_user
+from httpx import ASGITransport, AsyncClient
 
 from src.core.limiter import limiter
-from src.tests.test_user_handlers import unique_email
-
+from src.main import app
+from src.schemas.user_schemas import TokenData
+from src.utils.auth import get_current_user
+from src.utils.require_admin import require_admin
 
 app.dependency_overrides[get_current_user] = lambda: TokenData(
     user_id=1, email="test_user@example.com", role="user"
@@ -32,7 +29,9 @@ async def disable_rate_limit():
     # можно вернуть обратно, если нужно
 
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)
 
 
 @pytest_asyncio.fixture
@@ -42,8 +41,8 @@ async def client():
     )
 
     async with AsyncClient(
-            transport=transport,
-            base_url="http://test",
+        transport=transport,
+        base_url="http://test",
     ) as ac:
         yield ac
 

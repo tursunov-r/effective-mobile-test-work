@@ -1,11 +1,10 @@
-import re
-
 from pydantic import (
     BaseModel,
-    Field,
     EmailStr,
+    Field,
 )
-from src.schemas.mixins import PasswordMixin
+
+from src.schemas.mixins import PasswordMixin, PasswordOptionalMixin
 
 
 class UserCreateSchema(PasswordMixin):
@@ -17,7 +16,7 @@ class UserCreateSchema(PasswordMixin):
     confirm_password: str = Field(min_length=8)
 
 
-class UserUpdateSchema(UserCreateSchema):
+class UserUpdateSchema(PasswordOptionalMixin):
     first_name: str | None = Field(min_length=1, max_length=255, default=None)
     middle_name: str | None = Field(min_length=1, max_length=255, default=None)
     last_name: str | None = Field(min_length=1, max_length=255, default=None)

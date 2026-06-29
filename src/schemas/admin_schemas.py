@@ -1,6 +1,11 @@
 from pydantic import Field
 
-from src.schemas.user_schemas import UserCreateSchema, UserUpdateSchema, UserDataResponseSchema, UserCreateResponseSchema
+from src.schemas.user_schemas import (
+    UserCreateResponseSchema,
+    UserCreateSchema,
+    UserDataResponseSchema,
+    UserUpdateSchema,
+)
 
 
 class AdminUserCreateSchema(UserCreateSchema):

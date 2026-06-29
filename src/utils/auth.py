@@ -1,8 +1,9 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
 from fastapi import Request
-from passlib.context import CryptContext
 from jose import JWTError, jwt
+from passlib.context import CryptContext
+
 from src.core.settings import settings
 from src.exceptions.auth_exceptions import Unauthorized
 from src.schemas.user_schemas import TokenData
