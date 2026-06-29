@@ -1,12 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repositories.auth_repository import auth_repository
 from src.schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
     TokenData, UserUpdateSchema,
 )
 from src.repositories.user_repository import user_repository
+from src.services.logger import log_service
 
 
 class UserService:
@@ -15,16 +15,13 @@ class UserService:
         create_user = await user_repository.create_user_query(
             user=user, session=session
         )
+        log_service.info(f"create new user: ", user=user.email)
         return create_user
-
-    @staticmethod
-    async def get_profile(token: TokenData, session: AsyncSession):
-        profile = await auth_repository.get_profile_query(user=token, session=session)
-        return profile
 
     @staticmethod
     async def update_user(token: TokenData, user: UserUpdateSchema, session: AsyncSession):
         update_user = await user_repository.update_user_query(token=token, user=user, session=session)
+        log_service.info("update self profile: ", user=token.email)
         return update_user
 
     @staticmethod
@@ -32,6 +29,7 @@ class UserService:
         delete_user = await user_repository.delete_user_query(
             token=token, user=user, session=session
         )
+        log_service.info("delete self profile: ", user=token.email)
         return delete_user
 
 

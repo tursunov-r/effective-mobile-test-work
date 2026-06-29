@@ -38,7 +38,7 @@ async def get_user_by_id(user_id: int,
                          request: Request,
                          session: AsyncSession = Depends(get_session),
                          token: TokenData = Depends(require_admin)):
-    result = await user_repository.get_user_by_id(user_id=user_id, session=session)
+    result = await user_repository.get_user_by_id(user_id=user_id, session=session, token=token)
     return result
 
 
@@ -58,5 +58,5 @@ async def delete_user(user_id: int,
                       request: Request,
                       token: TokenData = Depends(require_admin),
                       session: AsyncSession = Depends(get_session)):
-    await admin_service.delete_user(user_id=user_id, session=session)
+    await admin_service.delete_user(user_id=user_id, session=session, token=token)
     return status.HTTP_204_NO_CONTENT

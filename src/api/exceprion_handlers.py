@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 
 from src.exceptions.auth_exceptions import Unauthorized, Forbidden, InvalidCredentials
 from src.exceptions.user_exceptions import UserNotFound, UserAlreadyExists
-
+from src.services.logger import log_service
 
 def register_exception_handlers(app: FastAPI):
     @app.exception_handler(Unauthorized)
@@ -12,6 +12,8 @@ def register_exception_handlers(app: FastAPI):
             request: Request,
             exc: Unauthorized,
     ):
+        log_service.error(
+            f"try login", error=exc,)
         return JSONResponse(status_code=401, content={"detail": str(exc)})
 
     @app.exception_handler(Forbidden)
@@ -19,6 +21,7 @@ def register_exception_handlers(app: FastAPI):
             request: Request,
             exc: Forbidden,
     ):
+        log_service.error(f"permission error", error=exc)
         return JSONResponse(status_code=403, content={"detail": str(exc)})
 
     @app.exception_handler(UserAlreadyExists)
@@ -26,6 +29,7 @@ def register_exception_handlers(app: FastAPI):
             request: Request,
             exc: UserAlreadyExists,
     ):
+        log_service.error("try to create user", error=str(exc))
         return JSONResponse(
             status_code=400, content={"detail": str(exc)}
         )
@@ -35,6 +39,7 @@ def register_exception_handlers(app: FastAPI):
             request: Request,
             exc: InvalidCredentials,
     ):
+        log_service.error("try to create user", error=str(exc))
         return JSONResponse(
             status_code=401, content={"detail": str(exc)}
         )
@@ -44,6 +49,7 @@ def register_exception_handlers(app: FastAPI):
             request: Request,
             exc: UserNotFound,
     ):
+        log_service.error("try to create user", error=str(exc))
         return JSONResponse(
             status_code=404, content={"detail": str(exc)}
         )

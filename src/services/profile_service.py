@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.schemas.user_schemas import UserLoginSchema, TokenData
 from src.repositories.auth_repository import auth_repository
+from src.services.logger import log_service
 from src.utils.auth import create_access_token
 from src.core.settings import settings
 
@@ -31,6 +32,7 @@ class ProfileService:
             samesite="Lax",
             max_age=3600 * 24,
         )
+        log_service.info(f"logged in user: ", user=user.email)
         return {"access_token": access_token, "token_type": "bearer"}
 
     @staticmethod
@@ -38,6 +40,7 @@ class ProfileService:
         result = await auth_repository.get_profile_query(
             user=user, session=session
         )
+        log_service.info(f"check self profile: ", user=user.email)
         return result
 
     @staticmethod
