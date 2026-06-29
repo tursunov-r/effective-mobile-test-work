@@ -139,7 +139,6 @@ class UserRepository:
         )
 
         session.add(create_admin)
-        print("Admin created")
 
 
 user_repository = UserRepository()

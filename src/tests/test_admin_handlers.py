@@ -36,12 +36,14 @@ async def test_create_user():
 @pytest.mark.asyncio
 async def test_get_users():
     transport = httpx.ASGITransport(app=app)
+    global user_count
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get(BASE_URL + "/")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
+        user_count = len(data)
+        print("user count", user_count)
         assert isinstance(data, list)
-        count = len(data)
 
 
 @pytest.mark.asyncio
